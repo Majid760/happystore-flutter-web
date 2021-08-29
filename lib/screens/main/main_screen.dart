@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'components/side_menu.dart';
 import 'package:provider/provider.dart';
 class MainScreen extends StatelessWidget {
+  static const String routeName = '/';
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-      key:context.read<MenuController>().scaffoldKey,
+      key:Provider.of<MenuController>(context).scaffoldKey,
       drawer: SideMenu(),
         body: SafeArea(
             child: Row(

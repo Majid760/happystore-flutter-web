@@ -22,9 +22,13 @@ environment:
 
 dependencies:
   auto_size_text: ^2.1.0
-  cloud_firestore: ^2.4.0
+  cloud_firestore: ^2.5.1
+  csv: ^5.0.0
   cupertino_icons: ^1.0.2
+  device_preview: ^0.7.4
+  file_picker: ^4.0.0
   firebase_auth: ^3.0.1
+  firebase_core: ^1.6.0
   firebase_storage: ^10.0.1
   fl_chart: ^0.35.0
   flutter:
@@ -32,7 +36,13 @@ dependencies:
   flutter_svg: ^0.22.0
   google_fonts: ^2.0.0
   google_sign_in: ^5.0.7
+  path: ^1.8.0
+  path_provider: ^2.0.2
+  percent_indicator: ^3.0.1
   provider: ^5.0.0
+  random_string: ^2.3.1
+  rflutter_alert: ^2.0.4
+  url_strategy: ^0.2.0
 
 dev_dependencies:
   flutter_test:

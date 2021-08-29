@@ -2,6 +2,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../main_screen.dart';
+import '../product_screen.dart';
+
 class SideMenu extends StatelessWidget {
   const SideMenu({
     Key key,
@@ -19,11 +22,21 @@ class SideMenu extends StatelessWidget {
             DrawerListTile(
                 title: "Dashboard",
                 svgSrc: "assets/icons/menu_dashbord.svg",
-                press: () {}),
+                press: () {
+                  Navigator.pushNamed(
+                    context,
+                    MainScreen.routeName,
+                    );
+                }),
             DrawerListTile(
                 title: "Products",
                 svgSrc: "assets/icons/menu_doc.svg",
-                press: () {}),
+                press: () {
+                  Navigator.pushNamed(
+                    context,
+                    ProductScreen.routeName,
+                    );
+                }),
             DrawerListTile(
                 title: "Users",
                 svgSrc: "assets/icons/menu_profile.svg",

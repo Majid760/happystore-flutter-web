@@ -18,7 +18,7 @@ class Header extends StatelessWidget {
       children: [
         if(!Responsive.isDesktop(context))
         IconButton (icon:Icon(Icons.menu),onPressed:(){ 
-          context.read<MenuController>().controlMenu();
+          Provider.of<MenuController>(context).controlMenu();
           },),
         if(!Responsive.isMobile(context))
         AutoSizeText(
