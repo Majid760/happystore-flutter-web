@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import 'controllers/ProgressIndicatorController.dart';
+import 'models/Product.dart';
 import 'screens/main/product_screen.dart';
 
 void main() {
@@ -24,6 +25,9 @@ void main() {
       ChangeNotifierProvider(
         create: (context) => ProgressIndicatorController(),
       ),
+      StreamProvider<double>(create: (context)=>Product().stream, initialData:0,
+      catchError: (_, error) => error,
+      )
     ],
     child: MyApp(),
   ));

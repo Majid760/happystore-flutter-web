@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:admin/controllers/FirebaseController.dart';
 import 'package:admin/controllers/ProgressIndicatorController.dart';
+import 'package:admin/models/Product.dart';
 import 'package:admin/responsive.dart';
 import 'package:admin/screens/dashboard/components/header_comp.dart';
 import 'package:admin/services/csv-reader.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
@@ -15,8 +18,6 @@ import '../../constants.dart';
 import 'components/side_menu.dart';
 
 class ProductScreen extends StatelessWidget {
-
-  
   static const String routeName = "product";
   File file;
   PlatformFile selectedFile;
@@ -28,7 +29,7 @@ class ProductScreen extends StatelessWidget {
         allowedExtensions: ['csv']);
     if (result != null) {
       selectedFile = result.files.first;
-      Future<String> data = selectParseCSV(selectedFile,context);
+      Future<String> data = selectParseCSV(selectedFile, context);
     } else {
       selectedFile = null;
     }
@@ -36,6 +37,7 @@ class ProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // List tableRows = Product().products_stream.data();
     return Scaffold(
         // key:Provider.of<MenuController>(context).scaffoldKey,
         drawer: SideMenu(),
@@ -75,18 +77,19 @@ class ProductScreen extends StatelessWidget {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Column(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceEvenly,
+                                                  MainAxisAlignment.spaceEvenly,
                                               children: [
                                                 AutoSizeText(
                                                   'Upload file (csv or xl)',
                                                   maxLines: 3,
                                                 ),
                                                 Padding(
-                                                  padding: const EdgeInsets.all(20.0),
+                                                  padding: const EdgeInsets.all(
+                                                      20.0),
                                                   child: IconButton(
                                                     iconSize: 30,
-                                                    icon: Icon(Icons.file_upload),
+                                                    icon:
+                                                        Icon(Icons.file_upload),
                                                     onPressed: () {
                                                       selectCSVFile(context);
                                                     },
@@ -103,9 +106,13 @@ class ProductScreen extends StatelessWidget {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
                                               children: [
-                                                Container(
-                                                  child:
-                                                      CircularPercentIndicator(
+                                                Consumer<
+                                                        ProgressIndicatorController>(
+                                                    builder: (context,
+                                                        indicator, _) {
+                                                  return Container(
+                                                      child:
+                                                          CircularPercentIndicator(
                                                     header: Padding(
                                                       padding:
                                                           const EdgeInsets.all(
@@ -116,52 +123,73 @@ class ProductScreen extends StatelessWidget {
                                                     radius: 100.0,
                                                     lineWidth: 10.0,
                                                     animation: true,
-                                                    percent: 0.7,
-                                                    center: Consumer<ProgressIndicatorController>(
-                                                      builder: (context,indicator,_){
-                                                      return AutoSizeText(indicator.progress_indicator.toStringAsFixed(3));
-                                                    }, ),
+                                                    animationDuration: (indicator
+                                                                .progress_indicator *
+                                                            100)
+                                                        .toInt(),
+                                                    percent: indicator
+                                                            .progress_indicator /
+                                                        100,
+                                                    center: AutoSizeText(
+                                                        indicator
+                                                            .progress_indicator
+                                                            .toStringAsFixed(
+                                                                2)),
                                                     footer: Padding(
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
                                                       child: AutoSizeText(
-                                                          'Total Entries'),
+                                                          'Total Entries ${indicator.length_file}'),
                                                     ),
                                                     circularStrokeCap:
                                                         CircularStrokeCap.round,
                                                     progressColor:
                                                         Colors.purple,
-                                                  ),
-                                                ),
-                                                Container(
-                                                  child:
-                                                      CircularPercentIndicator(
+                                                  ));
+                                                }),
+                                                Consumer<
+                                                        ProgressIndicatorController>(
+                                                    builder: (context,
+                                                        indicator, _) {
+                                                  return Container(
+                                                      child:
+                                                          CircularPercentIndicator(
                                                     header: Padding(
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
                                                       child: AutoSizeText(
-                                                          'File Uploading Progreass'),
+                                                          'File Reading Progreass'),
                                                     ),
                                                     radius: 100.0,
                                                     lineWidth: 10.0,
                                                     animation: true,
-                                                    percent: 0.4,
-                                                    center: AutoSizeText('49%'),
+                                                    animationDuration: (indicator
+                                                                .progress_indicator *
+                                                            100)
+                                                        .toInt(),
+                                                    percent: indicator
+                                                            .progress_indicator /
+                                                        100,
+                                                    center: AutoSizeText(
+                                                        indicator
+                                                            .progress_indicator
+                                                            .toStringAsFixed(
+                                                                2)),
                                                     footer: Padding(
                                                       padding:
                                                           const EdgeInsets.all(
                                                               8.0),
                                                       child: AutoSizeText(
-                                                          'Total Entries'),
+                                                          'Total Entries ${indicator.length_file}'),
                                                     ),
                                                     circularStrokeCap:
                                                         CircularStrokeCap.round,
                                                     progressColor:
                                                         Colors.purple,
-                                                  ),
-                                                ),
+                                                  ));
+                                                }),
                                               ]),
                                         )
                                       ],
@@ -176,6 +204,42 @@ class ProductScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+                      // product listing section
+
+                      AutoSizeText(
+                        'Products',
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                      SizedBox(
+                          width: double.infinity,
+                          child: StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection('products')
+                                  .snapshots(),
+                              builder: (context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (!snapshot.hasError) {
+                                  return DataTable(
+                                    // columnSpacing: defaultPadding,
+                                    columns: [
+                                      DataColumn(label: Text("Id")),
+                                      DataColumn(label: Text("Name")),
+                                      DataColumn(label: Text("Category")),
+                                      DataColumn(label: Text("Image")),
+                                      DataColumn(label: Text("Original Price")),
+                                      DataColumn(label: Text("Sale Price")),
+                                      DataColumn(label: Text("Discount")),
+                                      DataColumn(label: Text("Commission")),
+                                      DataColumn(label: Text("Date")),
+                                    ],
+                                    rows: _listofRows(snapshot.data),
+                                  );
+                                } else {
+                                  return  Center(
+                                      child: Center(
+                                          child: Text('Some bad thing happend')));
+                                }
+                              })),
                     ],
                   ),
                 )))
@@ -183,3 +247,44 @@ class ProductScreen extends StatelessWidget {
         )));
   }
 }
+
+List<DataRow> _listofRows(snapshotData) {
+  // Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
+  List<DataRow> newList = snapshotData.docs.map((DocumentSnapshot documentSnapshot) {
+    Map data = documentSnapshot.data() as Map;
+      return DataRow(cells: [
+        DataCell(Text(data['ProductID'])),
+        DataCell(Text(data['Product Name'])),
+        DataCell(Text(data['Category Name'])),
+        DataCell(Text(data['Product Image Url'])),
+        DataCell(Text(data['originalPrice'])),
+        DataCell(Text(data['salePrice'])),
+        DataCell(Text(data['Discount'])),
+        DataCell(Text(data['Commission Rate'])),
+        DataCell(Text(data['Out of Stock Date'])),
+      ]);
+  }).toList();
+  // newList = newList.whereType<DataRow>();
+
+  return newList;
+}
+
+// List<DataRow> _createRows(QuerySnapshot snapshot) {
+//     List<DataRow> newList =
+//         snapshot.docs.map((documentSnapshot) {
+//       return new DataRow(
+//         cells: [
+//             DataCell(Text(documentSnapshot.data()['ProductID'].toString() ?? 'default value')),
+//             DataCell(Text(documentSnapshot.data()['Product Name'].toString())),
+//             DataCell(Text(documentSnapshot.data()['Category Name'].toString())),
+//             DataCell(Text(documentSnapshot.data()['Product Image Url'].toString())),
+//             DataCell(Text(documentSnapshot.data()['originalPrice'].toString())),
+//             DataCell(Text(documentSnapshot.data()['salePrice'].toString())),
+//             DataCell(Text(documentSnapshot.data()['Discount'].toString())),
+//             DataCell(Text(documentSnapshot.data()['Commission Rate'].toString())),
+//             DataCell(Text(documentSnapshot.data()['Out of Stock Date'].toString())),
+//       ]);
+//     }).toList();
+
+//     return newList;
+//   }
