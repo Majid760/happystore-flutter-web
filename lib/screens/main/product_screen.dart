@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:admin/controllers/FirebaseController.dart';
 import 'package:admin/controllers/ProgressIndicatorController.dart';
-import 'package:admin/models/Product.dart';
 import 'package:admin/responsive.dart';
 import 'package:admin/screens/dashboard/components/header_comp.dart';
 import 'package:admin/services/csv-reader.dart';
@@ -18,6 +17,9 @@ import '../../constants.dart';
 import 'components/side_menu.dart';
 
 class ProductScreen extends StatelessWidget {
+  ProductScreen() {
+    // FirebaseController ins = new FirebaseController();
+  }
   static const String routeName = "product";
   File file;
   PlatformFile selectedFile;
@@ -212,10 +214,11 @@ class ProductScreen extends StatelessWidget {
                       ),
                       SizedBox(
                           width: double.infinity,
-                          child: StreamBuilder(
+                          child: StreamBuilder<
+                                  QuerySnapshot<Map<String, dynamic>>>(
                               stream: FirebaseFirestore.instance
                                   .collection('products')
-                                  .snapshots(),
+                                  .snapshots(includeMetadataChanges: true),
                               builder: (context,
                                   AsyncSnapshot<QuerySnapshot> snapshot) {
                                 if (!snapshot.hasError) {
@@ -232,12 +235,14 @@ class ProductScreen extends StatelessWidget {
                                       DataColumn(label: Text("Commission")),
                                       DataColumn(label: Text("Date")),
                                     ],
-                                    rows: _listofRows(snapshot.data),
+                                    rows:_listofRows(snapshot.data),
+                                    
                                   );
                                 } else {
-                                  return  Center(
+                                  return Center(
                                       child: Center(
-                                          child: Text('Some bad thing happend')));
+                                          child:
+                                              Text('Some bad thing happend')));
                                 }
                               })),
                     ],
@@ -250,41 +255,22 @@ class ProductScreen extends StatelessWidget {
 
 List<DataRow> _listofRows(snapshotData) {
   // Map<String, dynamic> data = document.data()! as Map<String, dynamic>;
-  List<DataRow> newList = snapshotData.docs.map((DocumentSnapshot documentSnapshot) {
+  List<DataRow> newList =
+      snapshotData.docs.map((DocumentSnapshot documentSnapshot) {
     Map data = documentSnapshot.data() as Map;
-      return DataRow(cells: [
-        DataCell(Text(data['ProductID'])),
-        DataCell(Text(data['Product Name'])),
-        DataCell(Text(data['Category Name'])),
-        DataCell(Text(data['Product Image Url'])),
-        DataCell(Text(data['originalPrice'])),
-        DataCell(Text(data['salePrice'])),
-        DataCell(Text(data['Discount'])),
-        DataCell(Text(data['Commission Rate'])),
-        DataCell(Text(data['Out of Stock Date'])),
-      ]);
+    print(data['salePrice']);
+    var check=DataRow(cells: [
+      DataCell(Text(data['ProductID'])),
+      DataCell(Text(data['Product Name'])),
+      DataCell(Text(data['Category Name'])),
+      DataCell(Text(data['Product Image Url'])),
+      DataCell(Text(data['originalPrice'])),
+      DataCell(Text(data['salePrice'])),
+      DataCell(Text(data['Discount'])),
+      DataCell(Text(data['Commission Rate'])),
+      DataCell(Text(data['Out of Stock Date'])),
+    ]);
   }).toList();
-  // newList = newList.whereType<DataRow>();
 
   return newList;
 }
-
-// List<DataRow> _createRows(QuerySnapshot snapshot) {
-//     List<DataRow> newList =
-//         snapshot.docs.map((documentSnapshot) {
-//       return new DataRow(
-//         cells: [
-//             DataCell(Text(documentSnapshot.data()['ProductID'].toString() ?? 'default value')),
-//             DataCell(Text(documentSnapshot.data()['Product Name'].toString())),
-//             DataCell(Text(documentSnapshot.data()['Category Name'].toString())),
-//             DataCell(Text(documentSnapshot.data()['Product Image Url'].toString())),
-//             DataCell(Text(documentSnapshot.data()['originalPrice'].toString())),
-//             DataCell(Text(documentSnapshot.data()['salePrice'].toString())),
-//             DataCell(Text(documentSnapshot.data()['Discount'].toString())),
-//             DataCell(Text(documentSnapshot.data()['Commission Rate'].toString())),
-//             DataCell(Text(documentSnapshot.data()['Out of Stock Date'].toString())),
-//       ]);
-//     }).toList();
-
-//     return newList;
-//   }

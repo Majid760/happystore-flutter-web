@@ -13,8 +13,9 @@ import 'controllers/ProgressIndicatorController.dart';
 import 'models/Product.dart';
 import 'screens/main/product_screen.dart';
 
-void main() {
+void main() async{
   setPathUrlStrategy();
+  FirebaseApp defaultApp = await Firebase.initializeApp();
   DevicePreview(
     enabled: !kReleaseMode,
     builder: (context) => MyApp(), // Wrap your app

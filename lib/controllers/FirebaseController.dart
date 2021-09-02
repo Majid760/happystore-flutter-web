@@ -7,7 +7,12 @@ class FirebaseController {
     FirebaseController.firestoreInstance
         .collection('products')
         .snapshots()
-        .listen((event) {});
+        .listen((event) {
+      event.docs.forEach((result) {
+        print(result.data()['ProductID']);
+        print(result.data()['Product Name']);
+      });
+    });
   }
 
   // get product stream from firebase
