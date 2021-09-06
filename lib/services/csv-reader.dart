@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:js_util';
 import 'dart:typed_data';
 
 import 'package:admin/controllers/ProgressIndicatorController.dart';
 import 'package:admin/models/Product.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 
 List csvList;
@@ -21,7 +19,7 @@ Future<String> selectParseCSV(selectedCSVFile, context) async {
   try {
     String s = new String.fromCharCodes(selectedCSVFile.bytes);
     ProgressIndicatorController proIndi =
-        Provider.of<ProgressIndicatorController>(context,listen: false);
+        Provider.of<ProgressIndicatorController>(context, listen: false);
 
     // Get the UTF8 decode as a Uint8List
     var outputAsUint8List = new Uint8List.fromList(s.codeUnits);
@@ -47,17 +45,16 @@ Future<String> selectParseCSV(selectedCSVFile, context) async {
     firstRow[IndexOfSign] = "salePrice";
     IndexOfSign = firstRow.indexOf("originalPrice(\$)");
     firstRow[IndexOfSign] = "originalPrice";
-    
+
     List<String> images = [];
     // removing the duplicate row/record
     csvList = csvFileContentList.toSet().toList();
     // fetch the each row from csv file and it gives the entire row in string form except fire row of column header
     for (int i = 1; i < csvList.length - 1; i++) {
-      proIndi.setProgressValue(i,csvList.length);
+      proIndi.setProgressValue(i, csvList.length);
 
       // convert the row(string) into list
       List<String> rowList = csvList[i].split(',');
-      
 
       List<String> newrowList = [];
       if (rowList.length > 14) {
