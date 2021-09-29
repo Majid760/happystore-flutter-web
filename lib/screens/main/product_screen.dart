@@ -214,7 +214,7 @@ class ProductScreen extends StatelessWidget {
 
                       AutoSizeText(
                         'List of Products',
-                        style:TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 16),
                       ),
                       SizedBox(
                           width: double.infinity,
@@ -222,27 +222,35 @@ class ProductScreen extends StatelessWidget {
                               stream: FirebaseController().products_stream,
                               builder: (context, snapshot) {
                                 if (!snapshot.hasError) {
-                                  return DataTable(
-                                    // columnSpacing: defaultPadding,
-                                    headingRowColor:
-                                        MaterialStateColor.resolveWith(
-                                      (states) {
-                                        return Colors.cyan.shade900;
-                                      },
+                                  return SingleChildScrollView(
+                                    scrollDirection: Axis.vertical,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: DataTable(
+                                        // columnSpacing: defaultPadding,
+                                        headingRowColor:
+                                            MaterialStateColor.resolveWith(
+                                          (states) {
+                                            return Colors.cyan.shade900;
+                                          },
+                                        ),
+                                        columns: [
+                                          DataColumn(label: Text("Id")),
+                                          DataColumn(label: Text("Name")),
+                                          DataColumn(label: Text("Category")),
+                                          DataColumn(label: Text("Image")),
+                                          DataColumn(
+                                              label: Text("Original(\$)")),
+                                          DataColumn(label: Text("Sale(\$)")),
+                                          DataColumn(label: Text("Discount")),
+                                          DataColumn(label: Text("Commission")),
+                                          DataColumn(label: Text("Date")),
+                                          DataColumn(label: Text('Info'))
+                                        ],
+                                        rows:
+                                            _listofRows(snapshot.data, context),
+                                      ),
                                     ),
-                                    columns: [
-                                      DataColumn(label: Text("Id")),
-                                      DataColumn(label: Text("Name")),
-                                      DataColumn(label: Text("Category")),
-                                      DataColumn(label: Text("Image")),
-                                      DataColumn(label: Text("Original(\$)")),
-                                      DataColumn(label: Text("Sale(\$)")),
-                                      DataColumn(label: Text("Discount")),
-                                      DataColumn(label: Text("Commission")),
-                                      DataColumn(label: Text("Date")),
-                                      DataColumn(label: Text('Info'))
-                                    ],
-                                    rows: _listofRows(snapshot.data, context),
                                   );
                                 } else {
                                   return Center(
@@ -266,10 +274,10 @@ List<DataRow> _listofRows(snapshotData, context) {
     return DataRow(cells: <DataCell>[
       DataCell(Text(i.toString())),
       DataCell(Text(
-        data['Product Name'],
+        data['Product Name'].substring(0,9)+' ...',
         maxLines: 2,
       )),
-      DataCell(Text(data['Category Name'])),
+      DataCell(Text(data['Category Name'].substring(0,9) + ' ...')),
       DataCell(
         Padding(
             padding: const EdgeInsets.all(8.0),
@@ -286,11 +294,13 @@ List<DataRow> _listofRows(snapshotData, context) {
       DataCell(Text(data['Discount'])),
       DataCell(Text(data['Commission Rate'])),
       DataCell(Text(data['Out of Stock Date'])),
-      DataCell(ElevatedButton(
-          child: Text('Detail'),
-          onPressed: () {
-            _displayDialog(context, data);
-          }))
+      DataCell(
+           Text('Edit'),
+           onTap:(){
+             _displayDialog(context, data);
+           },
+          showEditIcon: true
+          )
     ]);
   }).toList();
 
@@ -410,7 +420,7 @@ Widget productDetailPage(context, product) {
                   maxLines: 2,
                 ),
                 Padding(
-                  padding: const EdgeInsets.all( 15.0),
+                  padding: const EdgeInsets.all(15.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -426,7 +436,7 @@ Widget productDetailPage(context, product) {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all( 10.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -441,8 +451,8 @@ Widget productDetailPage(context, product) {
                     ],
                   ),
                 ),
-                 Padding(
-                  padding: const EdgeInsets.all( 10.0),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -458,20 +468,20 @@ Widget productDetailPage(context, product) {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all( 10.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      ElevatedButton(onPressed: (){
-                        Navigator.pop(context);
-
-                      }, child: Text('Cancle')
-                      ),
-                      ElevatedButton(onPressed: (){
-                        Navigator.pop(context, true);
-
-                      }, child: Text('Submit')
-                      ),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('Cancle')),
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: Text('Submit')),
                     ],
                   ),
                 ),

@@ -45,6 +45,7 @@ Future<String> selectParseCSV(selectedCSVFile, context) async {
     firstRow[IndexOfSign] = "salePrice";
     IndexOfSign = firstRow.indexOf("originalPrice(\$)");
     firstRow[IndexOfSign] = "originalPrice";
+    firstRow.add('quantity');
 
     List<String> images = [];
     // removing the duplicate row/record
@@ -66,10 +67,12 @@ Future<String> selectParseCSV(selectedCSVFile, context) async {
         newrowList.addAll(rowList.sublist(rowList.indexOf("\"")));
         int indexOf = newrowList.indexOf("\"");
         newrowList[indexOf] = images.toString();
+        newrowList.add('1');
         images.clear();
       } else {
         newrowList = rowList;
         newrowList.removeWhere((element) => element == "\"");
+        newrowList.add('1');
       }
 
       for (int j = 0; j < newrowList.length; j++) {
