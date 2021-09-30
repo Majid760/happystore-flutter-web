@@ -17,8 +17,8 @@ class _WelcomePageState extends State<WelcomePage> {
   Widget _submitButton() {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => LoginPage()));
+        Navigator.pushNamed(
+            context, LoginPage.routeName);
       },
       child: Container(
         width: MediaQuery.of(context).size.width,
@@ -45,8 +45,8 @@ class _WelcomePageState extends State<WelcomePage> {
   Widget _signUpButton() {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SignUpPage()));
+        Navigator.pushNamed(
+            context,SignUpPage.routeName);
       },
       child: Container(
         width: MediaQuery.of(context).size.width,

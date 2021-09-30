@@ -13,10 +13,16 @@ class FirebaseController {
   FirebaseController();
 
   // get product stream from firebase
-
   Stream<QuerySnapshot<Map<String, dynamic>>> get products_stream {
     return FirebaseController.firestoreInstance
         .collection('products')
         .snapshots(includeMetadataChanges: true);
+  }
+
+  // get products once
+
+  Future getproducts() async {
+    QuerySnapshot qn = await _db.collection("products").get();
+    return qn;
   }
 }

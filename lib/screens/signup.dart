@@ -1,12 +1,14 @@
 import 'package:admin/Widget/bezierContainer.dart';
 import 'package:admin/controllers/AuthController.dart';
 import 'package:admin/screens/loginPage.dart';
+import 'package:admin/screens/main/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'main/components/dialogBox.dart';
 
 class SignUpPage extends StatefulWidget {
+  static const String routeName = "singup";
   SignUpPage({Key key, this.title}) : super(key: key);
 
   final String title;
@@ -190,21 +192,22 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   onTap: () {
                     if (_formKeySignUp.currentState.validate()) {
-                      dynamic user = Authentication()
+                      // dynamic user = 
+                      Authentication()
                           .registerWithNameEmailAndPassword(
                               username, email, password, context);
-                      if (user == null) {
-                        msgDialog(
-                            context, 'something went wrong,please try again!');
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
+                      // if (user == null) {
+                      //   msgDialog(
+                      //       context, 'something went wrong,please try again!');
+                      // } else {
+                      //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      //       content: Text(
                               
-                              'Proceding further ...',
-                              style: TextStyle(color: Colors.deepOrangeAccent),
-                              textAlign:TextAlign.center,
-                            )));
-                      }
+                      //         'Proceding further ...',
+                      //         style: TextStyle(color: Colors.deepOrangeAccent),
+                      //         textAlign:TextAlign.center,
+                      //       )));
+                      // }
                       // If the form is valid, display a snackbar. In the real world,
                       // you'd often call a server or save the information in a database.
 
@@ -227,8 +230,8 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget _loginAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => LoginPage()));
+        Navigator.pushNamed(
+            context,  LoginPage.routeName);
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20),

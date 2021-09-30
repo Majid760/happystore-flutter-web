@@ -1,5 +1,6 @@
 import 'package:admin/Widget/bezierContainer.dart';
 import 'package:admin/controllers/AuthController.dart';
+import 'package:admin/screens/main/main_screen.dart';
 import 'package:admin/screens/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'main/components/dialogBox.dart';
 
 class LoginPage extends StatefulWidget {
+  static const String routeName = "login";
   LoginPage({Key key, this.title}) : super(key: key);
 
   final String title;
@@ -146,14 +148,12 @@ class _LoginPageState extends State<LoginPage> {
                     dynamic user = Authentication()
                         .signInWithEmailAndPassword(email, password, context);
                     if (user == null) {
-                      setState(() {
-                        loading = false;
-                        msgDialog(
-                            context, 'something went wrong,please try again!');
-                      });
+                      msgDialog(
+                          context, 'something went wrong,please try again!');
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Processing Data')));
+                          SnackBar(content: Text('Processing Data haaha...')));
+                       
                     }
                   }
                 },
@@ -261,7 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                     topRight: Radius.circular(5)),
               ),
               alignment: Alignment.center,
-              child: Text('Log in with Facebook',
+              child: Text('Log in with Google',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -276,8 +276,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget _createAccountLabel() {
     return InkWell(
       onTap: () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => SignUpPage()));
+        Navigator.pushNamed(
+            context,  SignUpPage.routeName);
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 20),

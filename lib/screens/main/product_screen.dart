@@ -18,13 +18,20 @@ import '../../constants.dart';
 import 'components/circle.dart';
 import 'components/side_menu.dart';
 
-class ProductScreen extends StatelessWidget {
+class ProductScreen extends StatefulWidget {
   ProductScreen() {
     // FirebaseController ins = new FirebaseController();
   }
   static const String routeName = "product";
+
+  @override
+  _ProductScreenState createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends State<ProductScreen> {
   File file;
   PlatformFile selectedFile;
+  int _rowPerPage = PaginatedDataTable.defaultRowsPerPage;
   Future selectCSVFile(context) async {
     FilePickerResult result = await FilePicker.platform.pickFiles(
         allowMultiple: false,
@@ -218,39 +225,33 @@ class ProductScreen extends StatelessWidget {
                       ),
                       SizedBox(
                           width: double.infinity,
-                          child: StreamBuilder(
-                              stream: FirebaseController().products_stream,
+                          child: FutureBuilder(
+                              future: FirebaseController().getproducts(),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasError) {
-                                  return SingleChildScrollView(
-                                    scrollDirection: Axis.vertical,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: DataTable(
-                                        // columnSpacing: defaultPadding,
-                                        headingRowColor:
-                                            MaterialStateColor.resolveWith(
-                                          (states) {
-                                            return Colors.cyan.shade900;
-                                          },
-                                        ),
-                                        columns: [
-                                          DataColumn(label: Text("Id")),
-                                          DataColumn(label: Text("Name")),
-                                          DataColumn(label: Text("Category")),
-                                          DataColumn(label: Text("Image")),
-                                          DataColumn(
-                                              label: Text("Original(\$)")),
-                                          DataColumn(label: Text("Sale(\$)")),
-                                          DataColumn(label: Text("Discount")),
-                                          DataColumn(label: Text("Commission")),
-                                          DataColumn(label: Text("Date")),
-                                          DataColumn(label: Text('Info'))
-                                        ],
-                                        rows:
-                                            _listofRows(snapshot.data, context),
-                                      ),
-                                    ),
+                                  return PaginatedDataTable(
+                                    header:Text('Product List'),
+                                    columns: [
+                                      DataColumn(label: Text("Id")),
+                                      DataColumn(label: Text("Name")),
+                                      DataColumn(label: Text("Category")),
+                                      DataColumn(label: Text("Image")),
+                                      DataColumn(
+                                          label: Text("Original(\$)")),
+                                      DataColumn(label: Text("Sale(\$)")),
+                                      DataColumn(label: Text("Discount")),
+                                      DataColumn(label: Text("Commission")),
+                                      DataColumn(label: Text("Date")),
+                                      DataColumn(label: Text('Info'))
+
+                                    ],
+                                    source:ProductDataTableSource(productList: snapshot.data.docs),
+                                    rowsPerPage: _rowPerPage,
+                                    onRowsPerPageChanged: (r){
+                                      setState(() {
+                                        _rowPerPage = r;
+                                      });
+                                    },
                                   );
                                 } else {
                                   return Center(
@@ -265,6 +266,54 @@ class ProductScreen extends StatelessWidget {
   }
 }
 
+class ProductDataTableSource extends DataTableSource {
+  final List productList;
+  List _products;
+  ProductDataTableSource({@required this.productList}) : _products = productList,
+        assert(productList != null);
+
+    @override
+  int get rowCount => _products.length;
+  @override
+  bool get isRowCountApproximate => false;
+
+
+  @override
+  int get selectedRowCount => 0;
+
+  @override
+  DataRow getRow(int index) {
+    final product = productList[index].data();
+    return DataRow.byIndex(index: index, cells: [
+      DataCell(Text(index.toString())),
+      DataCell(Text(
+        product['Product Name'].substring(0, 7) + ' ...',
+        maxLines: 2,
+      )),
+      DataCell(Text(product['Category Name'].substring(0, 6) + ' ...')),
+      DataCell(
+        Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+                height: 100,
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: showProductImage(product['Product Image Url']))),
+      ),
+      DataCell(Text(product['originalPrice'])),
+      DataCell(Text(product['salePrice'])),
+      DataCell(Text(product['Discount'])),
+      DataCell(Text(product['Commission Rate'])),
+      DataCell(Text(product['Out of Stock Date'])),
+      DataCell(Text('Edit'), onTap: () {
+        _displayDialog(context, product);
+      }, showEditIcon: true)
+    ]);
+  }
+}
+
 List<DataRow> _listofRows(snapshotData, context) {
   int i = 0;
   List<DataRow> newList =
@@ -274,10 +323,10 @@ List<DataRow> _listofRows(snapshotData, context) {
     return DataRow(cells: <DataCell>[
       DataCell(Text(i.toString())),
       DataCell(Text(
-        data['Product Name'].substring(0,9)+' ...',
+        data['Product Name'].substring(0, 7) + ' ...',
         maxLines: 2,
       )),
-      DataCell(Text(data['Category Name'].substring(0,9) + ' ...')),
+      DataCell(Text(data['Category Name'].substring(0, 6) + ' ...')),
       DataCell(
         Padding(
             padding: const EdgeInsets.all(8.0),
@@ -294,13 +343,9 @@ List<DataRow> _listofRows(snapshotData, context) {
       DataCell(Text(data['Discount'])),
       DataCell(Text(data['Commission Rate'])),
       DataCell(Text(data['Out of Stock Date'])),
-      DataCell(
-           Text('Edit'),
-           onTap:(){
-             _displayDialog(context, data);
-           },
-          showEditIcon: true
-          )
+      DataCell(Text('Edit'), onTap: () {
+        _displayDialog(context, data);
+      }, showEditIcon: true)
     ]);
   }).toList();
 
