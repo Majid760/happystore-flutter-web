@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class WelcomePage extends StatefulWidget {
-  static const String routeName = '/';
+  static const String routeName = '/welcome';
   WelcomePage({Key key, this.title}) : super(key: key);
 
   final String title;

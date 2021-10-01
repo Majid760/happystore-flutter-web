@@ -1,9 +1,11 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:admin/screens/main/components/dialogBox.dart';
-import 'package:admin/screens/main/main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 
 import 'FirebaseController.dart';
 
@@ -14,7 +16,7 @@ class Authentication {
   String email;
   String imageUrl;
   final _auth = FirebaseController().db_auth;
-
+  final _db = FirebaseController().db_instance;
   // auth change user stream
   Stream<User> get onAuthStateChanged => _auth.authStateChanges();
 
@@ -49,28 +51,26 @@ class Authentication {
       //     null, user.photoURL, user.emailVerified);
       return user;
     } catch (error) {
-            print(error.message.toString());
-            return null;
-
+      print(error.message.toString());
+      return null;
     }
   }
 
   // sign in with facebook
 
   Future signInWithFacebook() async {
-          print('your loged throud facebook!');
+    print('your loged throud facebook!');
 
-
-    final LoginResult result = await FacebookAuth.instance.login(permissions: ['public_profile', 'email']);
-        // by default we request the email and the public profile
-        // or FacebookAuth.i.login()
-        print(result);
+    final LoginResult result = await FacebookAuth.instance
+        .login(permissions: ['public_profile', 'email']);
+    // by default we request the email and the public profile
+    // or FacebookAuth.i.login()
+    print(result);
     if (result.status == LoginStatus.success) {
       // you are logged
       print('your loged throud facebook!');
       final AccessToken accessToken = result.accessToken;
     }
-    
   }
 
   // sign in with email and password
@@ -96,7 +96,22 @@ class Authentication {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
       User user = userCredential.user;
-     return user;
+      var bytes = utf8.encode(password); // data being hashed
+
+      var digest = sha1.convert(bytes);
+      _db
+          .collection('admins')
+          .doc(user.uid)
+          .set({
+            'name': fullName,
+            'email': email,
+            'password': bytes.toString(),
+            'date_creation': DateFormat("yyyy-MM-dd HH:mm:ss")
+          })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
+
+      return user;
     } on FirebaseAuthException catch (error) {
       msgDialog(context, error.message);
     }

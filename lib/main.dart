@@ -20,13 +20,14 @@ import 'screens/main/product_screen.dart';
 
 void main() async {
   setPathUrlStrategy();
-   await Firebase.initializeApp();
+  await Firebase.initializeApp();
   DevicePreview(
     enabled: !kReleaseMode,
     builder: (context) => MyApp(), // Wrap your app
   );
   runApp(MultiProvider(
     providers: [
+      ChangeNotifierProvider(create:(context)=>Product()),
       ChangeNotifierProvider(create: (context) => MenuController()),
       StreamProvider<User>.value(
         initialData: null,
@@ -54,11 +55,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       locale: DevicePreview.locale(context), // Add the locale here
       builder: DevicePreview.appBuilder,
-      initialRoute: '/',
+      initialRoute: '/welcome',
       routes: {
+        WelcomePage.routeName: (context) => WelcomePage(),
+        // MainScreen.routeName: (context) => MainScreen(),
         ProductScreen.routeName: (context) => ProductScreen(),
-        SignUpPage.routeName:(context) => SignUpPage(),
-        LoginPage.routeName:(context) => LoginPage()
+        SignUpPage.routeName: (context) => SignUpPage(),
+        LoginPage.routeName: (context) => LoginPage()
       },
       title: 'Happystore Admin Panel',
       theme: ThemeData.dark().copyWith(
@@ -67,8 +70,46 @@ class MyApp extends StatelessWidget {
             .apply(bodyColor: Colors.white),
         canvasColor: secondaryColor,
       ),
-      home: user == null ? WelcomePage(): MainScreen(),
+      home: user == null ? WelcomePage():MainScreen(),
     );
   }
 }
 
+// class Home extends StatelessWidget {
+//   const Home({Key key}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final routeName = ModalRoute.of(context).settings.name;
+//     print(routeName);
+//     final user = Provider.of<User>(context);
+//     switch (routeName) {
+//       case "/":
+//         {
+//           return user == null ? LoginPage() : MainScreen();
+//         }
+//         break;
+//       case "/welcome":
+//         {
+//           return user == null ? WelcomePage() : MainScreen();
+//         }
+//         break;
+//       case "/login":
+//         {
+//           return user == null ? LoginPage() : MainScreen();
+//         }
+//         break;
+//       case "/signup":
+//         {
+//           return user == null ? SignUpPage() : MainScreen();
+//         }
+//         break;
+//       case "/product":
+//         {
+//           return user == null ? LoginPage() : ProductScreen();
+//         }
+//         break;
+//       default:
+//     }
+//   }
+// }

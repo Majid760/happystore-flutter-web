@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'components/side_menu.dart';
 import 'package:provider/provider.dart';
 class MainScreen extends StatelessWidget {
-  static const String routeName = 'home';
+  static const String routeName = '/';
   @override
   Widget build(BuildContext context) {
 

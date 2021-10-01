@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:admin/controllers/FirebaseController.dart';
 import 'package:admin/controllers/ProgressIndicatorController.dart';
+import 'package:admin/models/Product.dart';
 import 'package:admin/responsive.dart';
 import 'package:admin/screens/dashboard/components/header_comp.dart';
 import 'package:admin/services/csv-reader.dart';
@@ -22,7 +23,7 @@ class ProductScreen extends StatefulWidget {
   ProductScreen() {
     // FirebaseController ins = new FirebaseController();
   }
-  static const String routeName = "product";
+  static const String routeName = "/product";
 
   @override
   _ProductScreenState createState() => _ProductScreenState();
@@ -223,60 +224,88 @@ class _ProductScreenState extends State<ProductScreen> {
                         'List of Products',
                         style: TextStyle(fontSize: 16),
                       ),
-                      SizedBox(
-                          width: double.infinity,
-                          child: FutureBuilder(
-                              future: FirebaseController().getproducts(),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasError) {
-                                  return PaginatedDataTable(
-                                    header:Text('Product List'),
-                                    columns: [
-                                      DataColumn(label: Text("Id")),
-                                      DataColumn(label: Text("Name")),
-                                      DataColumn(label: Text("Category")),
-                                      DataColumn(label: Text("Image")),
-                                      DataColumn(
-                                          label: Text("Original(\$)")),
-                                      DataColumn(label: Text("Sale(\$)")),
-                                      DataColumn(label: Text("Discount")),
-                                      DataColumn(label: Text("Commission")),
-                                      DataColumn(label: Text("Date")),
-                                      DataColumn(label: Text('Info'))
-
-                                    ],
-                                    source:ProductDataTableSource(productList: snapshot.data.docs),
-                                    rowsPerPage: _rowPerPage,
-                                    onRowsPerPageChanged: (r){
-                                      setState(() {
-                                        _rowPerPage = r;
-                                      });
-                                    },
-                                  );
-                                } else {
-                                  return Center(
-                                      child: CircularProgressIndicator());
-                                }
-                              })),
+                      Consumer<Product>(
+                        builder: (context,_product,_)=>
+                         SizedBox(
+                            width: double.infinity,
+                            child: FutureBuilder(
+                                future: _product.getProductsFutre(),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasError) {
+                                    return PaginatedDataTable(
+                                      header: Text('Product List'),
+                                      actions: <IconButton>[
+                                        IconButton(
+                                          splashColor: Colors.transparent,
+                                          icon: const Icon(Icons.refresh),
+                                          onPressed: () {
+                                            _product.getProductsFutre();
+                                            _showSBar(context,
+                                                '🔄🔄 Refreshed Successfully !!');
+                                          },
+                                        ),
+                                      ],
+                                      columns: [
+                                        DataColumn(label: Text("Id")),
+                                        DataColumn(label: Text("Name"),
+                                        tooltip: 'Product Name',
+                                        // onSort: (int col_Index,bool ascending)=>onSortColum(int columnIndex, bool ascending),
+                      
+                      
+                                        ),
+                                        DataColumn(label: Text("Category")),
+                                        DataColumn(label: Text("Image")),
+                                        DataColumn(label: Text("Original(\$)")),
+                                        DataColumn(label: Text("Sale(\$)")),
+                                        DataColumn(label: Text("Discount")),
+                                        DataColumn(label: Text("Commission")),
+                                        DataColumn(label: Text("Date")),
+                                        DataColumn(label: Text('Info'))
+                                      ],
+                                      source: ProductDataTableSource(
+                                          productList: snapshot.data.docs,
+                                          context: context),
+                                      rowsPerPage: _rowPerPage,
+                                      onRowsPerPageChanged: (r) {
+                                        setState(() {
+                                          _rowPerPage = r;
+                                        });
+                                      },
+                                    );
+                                  } else {
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  }
+                                })),
+                      ),
                     ],
                   ),
                 )))
           ],
         )));
   }
+  void _showSBar(BuildContext c, String textToShow) {
+    ScaffoldMessenger.of(c).showSnackBar(
+      SnackBar(
+        content: Text(textToShow,textAlign:TextAlign.center),
+        duration: const Duration(milliseconds: 2000),
+      ),
+    );
+  }
 }
 
 class ProductDataTableSource extends DataTableSource {
   final List productList;
+  final BuildContext context;
   List _products;
-  ProductDataTableSource({@required this.productList}) : _products = productList,
+  ProductDataTableSource({@required this.productList, @required this.context})
+      : _products = productList,
         assert(productList != null);
 
-    @override
+  @override
   int get rowCount => _products.length;
   @override
   bool get isRowCountApproximate => false;
-
 
   @override
   int get selectedRowCount => 0;
@@ -308,48 +337,22 @@ class ProductDataTableSource extends DataTableSource {
       DataCell(Text(product['Commission Rate'])),
       DataCell(Text(product['Out of Stock Date'])),
       DataCell(Text('Edit'), onTap: () {
-        _displayDialog(context, product);
+        _displayDialog(this.context, product);
       }, showEditIcon: true)
     ]);
   }
-}
 
-List<DataRow> _listofRows(snapshotData, context) {
-  int i = 0;
-  List<DataRow> newList =
-      snapshotData.docs.map<DataRow>((DocumentSnapshot documentSnapshot) {
-    i++;
-    Map data = documentSnapshot.data() as Map;
-    return DataRow(cells: <DataCell>[
-      DataCell(Text(i.toString())),
-      DataCell(Text(
-        data['Product Name'].substring(0, 7) + ' ...',
-        maxLines: 2,
-      )),
-      DataCell(Text(data['Category Name'].substring(0, 6) + ' ...')),
-      DataCell(
-        Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-                height: 100,
-                width: 120,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: showProductImage(data['Product Image Url']))),
-      ),
-      DataCell(Text(data['originalPrice'])),
-      DataCell(Text(data['salePrice'])),
-      DataCell(Text(data['Discount'])),
-      DataCell(Text(data['Commission Rate'])),
-      DataCell(Text(data['Out of Stock Date'])),
-      DataCell(Text('Edit'), onTap: () {
-        _displayDialog(context, data);
-      }, showEditIcon: true)
-    ]);
-  }).toList();
-
-  return newList;
+  // sort the column by name, price
+  onSortColum(int columnIndex, bool ascending) {
+    if (columnIndex == 0) {
+      if (ascending) {
+        // yourDataList.sort((a, b) => a['Product Name'].compareTo(b['Product Name']));
+      } else {
+        // yourDataList.sort((a, b) => b['name'].compareTo(a['name']));
+      }
+    }
+    notifyListeners();
+  }
 }
 
 _displayDialog(context, data) {

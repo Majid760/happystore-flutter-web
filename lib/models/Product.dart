@@ -12,6 +12,7 @@ class Product extends ChangeNotifier {
   StreamController<double> controller = StreamController<double>();
   Stream stream;
   double percent;
+  var futureProduct;
 
   // Create a CollectionReference called users that references the firestore collection
   CollectionReference productsReference =
@@ -29,6 +30,12 @@ class Product extends ChangeNotifier {
     productsList.forEach((product) => {
           addProduct(product)
           });
+  }
+
+  Future getProductsFutre() async{
+    futureProduct = await productsReference.limit(100).get();
+    notifyListeners();
+    return futureProduct;
   }
 
   

@@ -23,6 +23,8 @@ class FirebaseController {
 
   Future getproducts() async {
     QuerySnapshot qn = await _db.collection("products").get();
+
     return qn;
+    
   }
 }

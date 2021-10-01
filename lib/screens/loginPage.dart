@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'main/components/dialogBox.dart';
 
 class LoginPage extends StatefulWidget {
-  static const String routeName = "login";
+  static const String routeName = "/login";
   LoginPage({Key key, this.title}) : super(key: key);
 
   final String title;
